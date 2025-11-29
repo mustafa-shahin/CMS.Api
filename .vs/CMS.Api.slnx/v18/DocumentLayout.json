@@ -1,0 +1,117 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\git\\CMS.Api\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B58587C2-F8C5-49AE-8448-BDAA766A2BAD}|CMS.Application\\CMS.Application.csproj|d:\\git\\cms.api\\cms.application\\common\\models\\paginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B58587C2-F8C5-49AE-8448-BDAA766A2BAD}|CMS.Application\\CMS.Application.csproj|solutionrelative:cms.application\\common\\models\\paginatedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B58587C2-F8C5-49AE-8448-BDAA766A2BAD}|CMS.Application\\CMS.Application.csproj|d:\\git\\cms.api\\cms.application\\common\\models\\paginationparams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B58587C2-F8C5-49AE-8448-BDAA766A2BAD}|CMS.Application\\CMS.Application.csproj|solutionrelative:cms.application\\common\\models\\paginationparams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|d:\\git\\cms.api\\cms.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|solutionrelative:cms.domain\\common\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|d:\\git\\cms.api\\cms.domain\\entities\\fileentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|solutionrelative:cms.domain\\entities\\fileentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|d:\\git\\cms.api\\cms.domain\\entities\\auditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FA718305-E2B4-4D6A-A719-D4418A44005C}|CMS.Domain\\CMS.Domain.csproj|solutionrelative:cms.domain\\entities\\auditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PaginationParams.cs",
+              "DocumentMoniker": "D:\\git\\CMS.Api\\CMS.Application\\Common\\Models\\PaginationParams.cs",
+              "RelativeDocumentMoniker": "CMS.Application\\Common\\Models\\PaginationParams.cs",
+              "ToolTip": "D:\\git\\CMS.Api\\CMS.Application\\Common\\Models\\PaginationParams.cs",
+              "RelativeToolTip": "CMS.Application\\Common\\Models\\PaginationParams.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:47:22.984Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PaginatedList.cs",
+              "DocumentMoniker": "D:\\git\\CMS.Api\\CMS.Application\\Common\\Models\\PaginatedList.cs",
+              "RelativeDocumentMoniker": "CMS.Application\\Common\\Models\\PaginatedList.cs",
+              "ToolTip": "D:\\git\\CMS.Api\\CMS.Application\\Common\\Models\\PaginatedList.cs",
+              "RelativeToolTip": "CMS.Application\\Common\\Models\\PaginatedList.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:46:10.003Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "BaseEntity.cs",
+              "DocumentMoniker": "D:\\git\\CMS.Api\\CMS.Domain\\Common\\BaseEntity.cs",
+              "RelativeDocumentMoniker": "CMS.Domain\\Common\\BaseEntity.cs",
+              "ToolTip": "D:\\git\\CMS.Api\\CMS.Domain\\Common\\BaseEntity.cs",
+              "RelativeToolTip": "CMS.Domain\\Common\\BaseEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:40:15.404Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FileEntity.cs",
+              "DocumentMoniker": "D:\\git\\CMS.Api\\CMS.Domain\\Entities\\FileEntity.cs",
+              "RelativeDocumentMoniker": "CMS.Domain\\Entities\\FileEntity.cs",
+              "ToolTip": "D:\\git\\CMS.Api\\CMS.Domain\\Entities\\FileEntity.cs",
+              "RelativeToolTip": "CMS.Domain\\Entities\\FileEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:40:10.509Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuditLog.cs",
+              "DocumentMoniker": "D:\\git\\CMS.Api\\CMS.Domain\\Entities\\AuditLog.cs",
+              "RelativeDocumentMoniker": "CMS.Domain\\Entities\\AuditLog.cs",
+              "ToolTip": "D:\\git\\CMS.Api\\CMS.Domain\\Entities\\AuditLog.cs",
+              "RelativeToolTip": "CMS.Domain\\Entities\\AuditLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:38:59.149Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
