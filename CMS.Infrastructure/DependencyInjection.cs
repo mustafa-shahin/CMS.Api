@@ -1,7 +1,5 @@
 ﻿using System.Text;
 using CMS.Application.Common.Interfaces;
-using CMS.Domain.Constants;
-using CMS.Domain.Enums;
 using CMS.Infrastructure.Identity;
 using CMS.Infrastructure.Persistence;
 using CMS.Infrastructure.Services;
@@ -26,68 +24,67 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Database
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
                 npgsqlOptions =>
                 {
-                    npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                     npgsqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
                         errorCodesToAdd: null);
-                }));
+                    npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                });
+        });
 
-        services.AddScoped<IApplicationDbContext>(provider =>
-            provider.GetRequiredService<ApplicationDbContext>());
+        // Register DbContext as IApplicationDbContext
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
+        // Database initializer
         services.AddScoped<ApplicationDbContextInitializer>();
 
         // Identity services
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddSingleton<IDateTimeService, DateTimeService>();
 
-        // HTTP Context accessor (required for CurrentUserService)
-        services.AddHttpContextAccessor();
+        // Other services
+        services.AddSingleton<IDateTimeService, DateTimeService>();
 
         // JWT Authentication
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         })
         .AddJwtBearer(options =>
         {
+            var jwtKey = configuration["Jwt:Key"]
+                ?? throw new InvalidOperationException("JWT Key is not configured.");
+            var jwtIssuer = configuration["Jwt:Issuer"]
+                ?? throw new InvalidOperationException("JWT Issuer is not configured.");
+            var jwtAudience = configuration["Jwt:Audience"]
+                ?? throw new InvalidOperationException("JWT Audience is not configured.");
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
-                ValidAudience = configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
-                ClockSkew = TimeSpan.Zero // No tolerance for token expiration
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                ClockSkew = TimeSpan.FromSeconds(30) // Reduce default 5 minute clock skew
             };
 
             options.Events = new JwtBearerEvents
             {
-                OnMessageReceived = context =>
-                {
-                    // Support token from cookie for added security
-                    if (context.Request.Cookies.TryGetValue("access_token", out var token))
-                    {
-                        context.Token = token;
-                    }
-                    return Task.CompletedTask;
-                },
                 OnAuthenticationFailed = context =>
                 {
-                    // Add token expired header for client handling
-                    if (context.Exception is SecurityTokenExpiredException)
+                    if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                     {
                         context.Response.Headers.Append("Token-Expired", "true");
                     }
@@ -95,23 +92,6 @@ public static class DependencyInjection
                 }
             };
         });
-
-        // Authorization policies
-        services.AddAuthorizationBuilder()
-            .AddPolicy(Permissions.RequireAdmin, policy =>
-                policy.RequireRole(UserRole.Admin.ToString()))
-            .AddPolicy(Permissions.RequireAdminOrDeveloper, policy =>
-                policy.RequireRole(UserRole.Admin.ToString(), UserRole.Developer.ToString()))
-            .AddPolicy(Permissions.CanAccessDashboard, policy =>
-                policy.RequireAssertion(context =>
-                    context.User.IsInRole(UserRole.Admin.ToString()) ||
-                    context.User.IsInRole(UserRole.Developer.ToString())))
-            .AddPolicy(Permissions.CanAccessDesigner, policy =>
-                policy.RequireAssertion(context =>
-                    context.User.IsInRole(UserRole.Admin.ToString()) ||
-                    context.User.IsInRole(UserRole.Developer.ToString())))
-            .AddPolicy(Permissions.CanManageUsers, policy =>
-                policy.RequireRole(UserRole.Admin.ToString()));
 
         return services;
     }

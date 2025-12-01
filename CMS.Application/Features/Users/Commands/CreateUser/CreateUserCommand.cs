@@ -1,5 +1,4 @@
-﻿using CMS.Application.Common.Exceptions;
-using CMS.Application.Common.Interfaces;
+﻿using CMS.Application.Common.Interfaces;
 using CMS.Application.Features.Users.DTOs;
 using CMS.Application.Mapping;
 using CMS.Domain.Entities;
@@ -7,6 +6,7 @@ using CMS.Domain.Enums;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ValidationException = CMS.Application.Common.Exceptions.ValidationException;
 
 namespace CMS.Application.Features.Users.Commands.CreateUser;
 

@@ -1,13 +1,12 @@
-﻿using CMS.Application.Common.Interfaces;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using CMS.Application.Common.Interfaces;
 using CMS.Domain.Constants;
 using CMS.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace CMS.Infrastructure.Identity;
 
@@ -16,7 +15,6 @@ namespace CMS.Infrastructure.Identity;
 /// </summary>
 public sealed class TokenService : ITokenService
 {
-    private readonly IConfiguration _configuration;
     private readonly string _secretKey;
     private readonly string _issuer;
     private readonly string _audience;
@@ -26,16 +24,15 @@ public sealed class TokenService : ITokenService
 
     public TokenService(IConfiguration configuration)
     {
-        _configuration = configuration;
-        _secretKey = _configuration["Jwt:Key"]
+        _secretKey = configuration["Jwt:Key"]
             ?? throw new InvalidOperationException("JWT Key is not configured.");
-        _issuer = _configuration["Jwt:Issuer"]
+        _issuer = configuration["Jwt:Issuer"]
             ?? throw new InvalidOperationException("JWT Issuer is not configured.");
-        _audience = _configuration["Jwt:Audience"]
+        _audience = configuration["Jwt:Audience"]
             ?? throw new InvalidOperationException("JWT Audience is not configured.");
 
-        AccessTokenExpirationMinutes = _configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15);
-        RefreshTokenExpirationDays = _configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays", 7);
+        AccessTokenExpirationMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15);
+        RefreshTokenExpirationDays = configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays", 7);
     }
 
     /// <summary>
@@ -43,30 +40,33 @@ public sealed class TokenService : ITokenService
     /// </summary>
     public string GenerateAccessToken(User user)
     {
-        var claims = new List<Claim>
+        var claims = new Dictionary<string, object>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new(Permissions.UserIdClaimType, user.Id.ToString()),
-            new(Permissions.EmailClaimType, user.Email),
-            new(Permissions.RoleClaimType, user.Role.ToString()),
-            new(Permissions.FullNameClaimType, user.FullName),
-            new(ClaimTypes.Role, user.Role.ToString())
+            [JwtRegisteredClaimNames.Sub] = user.Id.ToString(),
+            [JwtRegisteredClaimNames.Email] = user.Email,
+            [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString(),
+            [JwtRegisteredClaimNames.Iat] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            [Permissions.UserIdClaimType] = user.Id.ToString(),
+            [Permissions.EmailClaimType] = user.Email,
+            [Permissions.RoleClaimType] = user.Role.ToString(),
+            [Permissions.FullNameClaimType] = user.FullName,
+            [ClaimTypes.Role] = user.Role.ToString()
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(AccessTokenExpirationMinutes),
-            signingCredentials: credentials);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Issuer = _issuer,
+            Audience = _audience,
+            Claims = claims,
+            Expires = DateTime.UtcNow.AddMinutes(AccessTokenExpirationMinutes),
+            SigningCredentials = credentials
+        };
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var handler = new JsonWebTokenHandler();
+        return handler.CreateToken(tokenDescriptor);
     }
 
     /// <summary>
@@ -74,10 +74,7 @@ public sealed class TokenService : ITokenService
     /// </summary>
     public (string Token, string TokenHash) GenerateRefreshToken()
     {
-        var randomBytes = new byte[64];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomBytes);
-
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
         var token = Convert.ToBase64String(randomBytes);
         var tokenHash = HashToken(token);
 

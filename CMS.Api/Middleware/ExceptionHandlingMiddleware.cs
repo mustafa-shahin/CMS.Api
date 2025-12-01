@@ -1,15 +1,14 @@
-﻿using CMS.Application.Common.Exceptions;
-using CMS.Shared.Constants;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
+using CMS.Application.Common.Exceptions;
+using CMS.Application.Common.Models;
+using CMS.Shared.Constants;
+using FluentValidation;
 
 namespace CMS.Api.Middleware;
 
 /// <summary>
-/// Middleware for global exception handling.
-/// Converts exceptions to appropriate HTTP responses with problem details.
+/// Global exception handling middleware that converts exceptions to standardized API responses.
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
@@ -41,110 +40,71 @@ public sealed class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var (statusCode, problemDetails) = exception switch
+        var (statusCode, errorCode, message, errors) = exception switch
         {
-            ValidationException validationEx => (
-                HttpStatusCode.BadRequest,
-                CreateValidationProblemDetails(context, validationEx)),
+            Application.Common.Exceptions.ValidationException validationEx =>
+                (HttpStatusCode.BadRequest, ErrorCodes.ValidationFailed, "One or more validation errors occurred.", validationEx.Errors),
 
-            NotFoundException notFoundEx => (
-                HttpStatusCode.NotFound,
-                CreateProblemDetails(context, HttpStatusCode.NotFound,
-                    "Not Found", notFoundEx.Message, ErrorCodes.NotFound)),
+            FluentValidation.ValidationException fluentValidationEx =>
+                (HttpStatusCode.BadRequest, ErrorCodes.ValidationFailed, "One or more validation errors occurred.",
+                    fluentValidationEx.Errors.GroupBy(e => e.PropertyName).ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())),
 
-            UnauthorizedException unauthorizedEx => (
-                HttpStatusCode.Unauthorized,
-                CreateProblemDetails(context, HttpStatusCode.Unauthorized,
-                    "Unauthorized", unauthorizedEx.Message, unauthorizedEx.ErrorCode)),
+            NotFoundException notFoundEx =>
+                (HttpStatusCode.NotFound, ErrorCodes.NotFound, notFoundEx.Message, null),
 
-            ForbiddenAccessException forbiddenEx => (
-                HttpStatusCode.Forbidden,
-                CreateProblemDetails(context, HttpStatusCode.Forbidden,
-                    "Forbidden", forbiddenEx.Message, forbiddenEx.ErrorCode)),
+            UnauthorizedException unauthorizedEx =>
+                (HttpStatusCode.Unauthorized, unauthorizedEx.ErrorCode, unauthorizedEx.Message, null),
 
-            BusinessRuleException businessEx => (
-                HttpStatusCode.UnprocessableEntity,
-                CreateProblemDetails(context, HttpStatusCode.UnprocessableEntity,
-                    "Business Rule Violation", businessEx.Message, businessEx.ErrorCode)),
+            ForbiddenAccessException forbiddenEx =>
+                (HttpStatusCode.Forbidden, forbiddenEx.ErrorCode, forbiddenEx.Message, null),
 
-            _ => (
-                HttpStatusCode.InternalServerError,
-                CreateProblemDetails(context, HttpStatusCode.InternalServerError,
-                    "Internal Server Error", GetErrorMessage(exception), ErrorCodes.InternalError))
+            BusinessRuleException businessEx =>
+                (HttpStatusCode.BadRequest, businessEx.ErrorCode, businessEx.Message, null),
+
+            OperationCanceledException =>
+                (HttpStatusCode.BadRequest, "REQUEST_CANCELLED", "The request was cancelled.", null),
+
+            _ =>
+                (HttpStatusCode.InternalServerError, ErrorCodes.InternalError, "An unexpected error occurred.", null)
         };
 
         // Log the exception
-        LogException(exception, statusCode);
+        if (statusCode == HttpStatusCode.InternalServerError)
+        {
+            _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+        }
+        else
+        {
+            _logger.LogWarning("A handled exception occurred: {Message}", exception.Message);
+        }
 
-        // Write response
+        // Build response
+        var response = new ApiErrorResponse
+        {
+            Success = false,
+            StatusCode = (int)statusCode,
+            ErrorCode = errorCode,
+            Message = message,
+            Errors = errors,
+            TraceId = context.TraceIdentifier,
+            Timestamp = DateTime.UtcNow
+        };
+
+        // Include stack trace in development
+        if (_environment.IsDevelopment() && statusCode == HttpStatusCode.InternalServerError)
+        {
+            response.Detail = exception.ToString();
+        }
+
+        context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
-        context.Response.ContentType = "application/problem+json";
 
         var options = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, options));
-    }
-
-    private ProblemDetails CreateProblemDetails(
-        HttpContext context,
-        HttpStatusCode statusCode,
-        string title,
-        string detail,
-        string errorCode)
-    {
-        return new ProblemDetails
-        {
-            Status = (int)statusCode,
-            Title = title,
-            Detail = detail,
-            Instance = context.Request.Path,
-            Extensions =
-            {
-                ["errorCode"] = errorCode,
-                ["traceId"] = context.TraceIdentifier
-            }
-        };
-    }
-
-    private ValidationProblemDetails CreateValidationProblemDetails(
-        HttpContext context,
-        ValidationException exception)
-    {
-        return new ValidationProblemDetails(exception.Errors)
-        {
-            Status = (int)HttpStatusCode.BadRequest,
-            Title = "Validation Failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = context.Request.Path,
-            Extensions =
-            {
-                ["errorCode"] = ErrorCodes.ValidationFailed,
-                ["traceId"] = context.TraceIdentifier
-            }
-        };
-    }
-
-    private string GetErrorMessage(Exception exception)
-    {
-        // Only expose detailed error messages in development
-        return _environment.IsDevelopment()
-            ? exception.Message
-            : "An unexpected error occurred. Please try again later.";
-    }
-
-    private void LogException(Exception exception, HttpStatusCode statusCode)
-    {
-        var logLevel = statusCode switch
-        {
-            HttpStatusCode.InternalServerError => LogLevel.Error,
-            HttpStatusCode.BadRequest => LogLevel.Warning,
-            HttpStatusCode.NotFound => LogLevel.Information,
-            _ => LogLevel.Warning
-        };
-
-        _logger.Log(logLevel, exception, "Exception occurred: {Message}", exception.Message);
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
     }
 }
