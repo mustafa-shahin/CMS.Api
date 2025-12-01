@@ -1,14 +1,15 @@
 ﻿namespace CMS.Domain.Common;
 
 /// <summary>
-/// Base class for all domain entities.
+/// Base class for all domain entities using integer-based identity.
+/// Provides domain event management capabilities.
 /// </summary>
 public abstract class BaseEntity
 {
     /// <summary>
     /// The unique identifier for this entity.
     /// </summary>
-    public Guid Id { get; protected set; }
+    public int Id { get; protected set; }
 
     /// <summary>
     /// Domain events associated with this entity.
@@ -45,12 +46,4 @@ public abstract class BaseEntity
     {
         _domainEvents.Clear();
     }
-}
-
-/// <summary>
-/// Marker interface for domain events.
-/// </summary>
-public interface IDomainEvent
-{
-    DateTime OccurredOn { get; }
 }

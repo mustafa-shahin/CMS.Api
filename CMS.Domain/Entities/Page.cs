@@ -1,4 +1,5 @@
 ﻿using CMS.Domain.Common;
+using CMS.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

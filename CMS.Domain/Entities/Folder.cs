@@ -5,7 +5,6 @@ namespace CMS.Domain.Entities
 {
     public sealed class Folder : BaseAuditableEntity
     {
-        public Guid Id { get; private set; }
         public string Name { get; private set; } = null!;
         public Guid? ParentId { get; private set; }
 
@@ -20,7 +19,6 @@ namespace CMS.Domain.Entities
         {
             return new Folder
             {
-                Id = Guid.CreateVersion7(),
                 Name = name,
                 ParentId = parentId,
                 CreatedByUserId = createdByUserId

@@ -1,4 +1,5 @@
 ﻿using CMS.Domain.Common;
+using CMS.Domain.Enums;
 using System.Text.Json;
 
 namespace CMS.Domain.Entities

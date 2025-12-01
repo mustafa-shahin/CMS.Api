@@ -2,13 +2,14 @@
 
 /// <summary>
 /// Base class for all auditable entities that tracks creation and modification metadata.
+/// Inherits from BaseEntity and implements IAuditableEntity for automatic audit field population.
 /// </summary>
-public abstract class BaseAuditableEntity : BaseEntity
+public abstract class BaseAuditableEntity : BaseEntity, IAuditableEntity
 {
     /// <summary>
     /// The ID of the user who created this entity.
     /// </summary>
-    public Guid? CreatedBy { get; set; }
+    public int? CreatedBy { get; set; }
 
     /// <summary>
     /// The UTC date and time when this entity was created.
@@ -18,7 +19,7 @@ public abstract class BaseAuditableEntity : BaseEntity
     /// <summary>
     /// The ID of the user who last modified this entity.
     /// </summary>
-    public Guid? LastModifiedBy { get; set; }
+    public int? LastModifiedBy { get; set; }
 
     /// <summary>
     /// The UTC date and time when this entity was last modified.
