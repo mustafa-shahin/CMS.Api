@@ -20,19 +20,19 @@ public sealed class SecurityHeadersMiddleware
         context.Response.Headers.Remove("X-Powered-By");
 
         // Prevent clickjacking attacks
-        context.Response.Headers["X-Frame-Options"] = "DENY";
+        context.Response.Headers.XFrameOptions = "DENY";
 
         // Enable browser's XSS filter (legacy but still useful)
-        context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+        context.Response.Headers.XXSSProtection = "1; mode=block";
 
         // Prevent MIME type sniffing
-        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        context.Response.Headers.XContentTypeOptions = "nosniff";
 
         // Control referrer information sent to other sites
         context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
 
         // Content Security Policy - strict policy for API
-        context.Response.Headers["Content-Security-Policy"] =
+        context.Response.Headers.ContentSecurityPolicy =
             "default-src 'none'; " +
             "frame-ancestors 'none'; " +
             "form-action 'none'; " +
@@ -52,9 +52,9 @@ public sealed class SecurityHeadersMiddleware
         // Prevent caching of sensitive information
         if (context.Request.Path.StartsWithSegments("/api"))
         {
-            context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
-            context.Response.Headers["Pragma"] = "no-cache";
-            context.Response.Headers["Expires"] = "0";
+            context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+            context.Response.Headers.Pragma = "no-cache";
+            context.Response.Headers.Expires = "0";
         }
 
         await _next(context);

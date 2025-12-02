@@ -1,12 +1,13 @@
 ﻿using CMS.Application.Common.Exceptions;
 using CMS.Application.Common.Interfaces;
+using CMS.Application.Features.Auth;
+using CMS.Domain.Entities;
 using CMS.Shared.Constants;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RefreshTokenEntity = CMS.Domain.Entities.RefreshToken;
 
-namespace CMS.Application.Features.Auth.Commands.RefreshToken;
+namespace CMS.Application.Features.Auth.Commands.RefreshTokens;
 
 /// <summary>
 /// Command for refreshing JWT tokens.
@@ -93,7 +94,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
             newRefreshTokenHash);
 
         // Create new refresh token
-        var newRefreshTokenEntity = RefreshTokenEntity.Create(
+        var newRefreshTokenEntity = RefreshToken.Create(
             user.Id,
             newRefreshTokenHash,
             _tokenService.RefreshTokenExpirationDays,

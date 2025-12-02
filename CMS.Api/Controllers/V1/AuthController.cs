@@ -3,7 +3,7 @@ using CMS.Application.Common.Models;
 using CMS.Application.Features.Auth;
 using CMS.Application.Features.Auth.Commands.Login;
 using CMS.Application.Features.Auth.Commands.Logout;
-using CMS.Application.Features.Auth.Commands.RefreshToken;
+using CMS.Application.Features.Auth.Commands.RefreshTokens;
 using CMS.Application.Features.Auth.Commands.Register;
 using CMS.Application.Features.Auth.Queries.GetCurrentUser;
 using CMS.Application.Features.Users.DTOs;

@@ -2,7 +2,6 @@
 using CMS.Domain.Constants;
 using CMS.Domain.Enums;
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
