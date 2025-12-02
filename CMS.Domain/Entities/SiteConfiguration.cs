@@ -10,11 +10,6 @@ namespace CMS.Domain.Entities;
 public sealed class SiteConfiguration : BaseAuditableEntity
 {
     /// <summary>
-    /// Unique identifier for the configuration.
-    /// </summary>
-    public new Guid Id { get; private set; }
-
-    /// <summary>
     /// Configuration key.
     /// </summary>
     public string Key { get; private set; } = null!;
@@ -50,7 +45,6 @@ public sealed class SiteConfiguration : BaseAuditableEntity
 
         return new SiteConfiguration
         {
-            Id = Guid.NewGuid(),
             Key = key.Trim(),
             Value = value,
             Category = category

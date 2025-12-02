@@ -8,11 +8,6 @@ namespace CMS.Domain.Entities;
 public sealed class FileEntity : BaseAuditableEntity
 {
     /// <summary>
-    /// Unique identifier for the file.
-    /// </summary>
-    public new Guid Id { get; private set; }
-
-    /// <summary>
     /// System-generated unique filename.
     /// </summary>
     public string FileName { get; private set; } = null!;
@@ -43,7 +38,7 @@ public sealed class FileEntity : BaseAuditableEntity
     public string? PublicUrl { get; private set; }
 
     // Navigation properties
-    public Guid? FolderId { get; private set; }
+    public int? FolderId { get; private set; }
     public Folder? Folder { get; private set; }
     public int UploadedByUserId { get; private set; }
     public User UploadedByUser { get; private set; } = null!;
@@ -63,7 +58,7 @@ public sealed class FileEntity : BaseAuditableEntity
         long size,
         string storagePath,
         int uploadedByUserId,
-        Guid? folderId = null)
+        int? folderId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         ArgumentException.ThrowIfNullOrWhiteSpace(originalName);
@@ -72,7 +67,6 @@ public sealed class FileEntity : BaseAuditableEntity
 
         return new FileEntity
         {
-            Id = Guid.NewGuid(),
             FileName = fileName,
             OriginalName = originalName,
             ContentType = contentType,
@@ -86,7 +80,7 @@ public sealed class FileEntity : BaseAuditableEntity
     /// <summary>
     /// Moves the file to a different folder.
     /// </summary>
-    public void MoveToFolder(Guid? folderId)
+    public void MoveToFolder(int? folderId)
     {
         FolderId = folderId;
     }

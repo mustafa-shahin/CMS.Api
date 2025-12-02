@@ -10,11 +10,6 @@ namespace CMS.Domain.Entities;
 public sealed class Page : BaseAuditableEntity
 {
     /// <summary>
-    /// Unique identifier for the page.
-    /// </summary>
-    public new Guid Id { get; private set; }
-
-    /// <summary>
     /// Page title.
     /// </summary>
     public string Title { get; private set; } = null!;
@@ -76,7 +71,6 @@ public sealed class Page : BaseAuditableEntity
 
         return new Page
         {
-            Id = Guid.NewGuid(),
             Title = title.Trim(),
             Slug = slug.ToLowerInvariant().Trim(),
             Status = PageStatus.Draft,

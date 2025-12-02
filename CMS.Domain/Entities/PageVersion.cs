@@ -10,12 +10,12 @@ public sealed class PageVersion
     /// <summary>
     /// Unique identifier for this version record.
     /// </summary>
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
 
     /// <summary>
     /// The page this version belongs to.
     /// </summary>
-    public Guid PageId { get; private set; }
+    public int PageId { get; private set; }
 
     /// <summary>
     /// Version number at the time of snapshot.
@@ -63,7 +63,6 @@ public sealed class PageVersion
     {
         return new PageVersion
         {
-            Id = Guid.NewGuid(),
             PageId = page.Id,
             Version = page.Version,
             Title = page.Title,

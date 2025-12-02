@@ -23,9 +23,17 @@ public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
         _dateTimeService = dateTimeService;
     }
 
+    // Core entities
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    // CMS entities
+    public DbSet<Page> Pages => Set<Page>();
+    public DbSet<PageVersion> PageVersions => Set<PageVersion>();
+    public DbSet<FileEntity> Files => Set<FileEntity>();
+    public DbSet<Folder> Folders => Set<Folder>();
+    public DbSet<SiteConfiguration> SiteConfigurations => Set<SiteConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

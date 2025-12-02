@@ -25,6 +25,31 @@ public interface IApplicationDbContext
     DbSet<AuditLog> AuditLogs { get; }
 
     /// <summary>
+    /// Pages table.
+    /// </summary>
+    DbSet<Page> Pages { get; }
+
+    /// <summary>
+    /// Page versions table.
+    /// </summary>
+    DbSet<PageVersion> PageVersions { get; }
+
+    /// <summary>
+    /// Files table.
+    /// </summary>
+    DbSet<FileEntity> Files { get; }
+
+    /// <summary>
+    /// Folders table.
+    /// </summary>
+    DbSet<Folder> Folders { get; }
+
+    /// <summary>
+    /// Site configurations table.
+    /// </summary>
+    DbSet<SiteConfiguration> SiteConfigurations { get; }
+
+    /// <summary>
     /// Saves all changes made in this context to the database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

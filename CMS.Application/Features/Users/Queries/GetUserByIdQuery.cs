@@ -6,7 +6,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CMS.Application.Features.Users.Queries.GetUserById;
+namespace CMS.Application.Features.Users.Queries;
 
 /// <summary>
 /// Query to get a user by their ID.

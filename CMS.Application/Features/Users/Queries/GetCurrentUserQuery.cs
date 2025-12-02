@@ -5,7 +5,7 @@ using CMS.Application.Mapping;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CMS.Application.Features.Auth.Queries.GetCurrentUser;
+namespace CMS.Application.Features.Users.Queries;
 
 /// <summary>
 /// Query to get the currently authenticated user's information.

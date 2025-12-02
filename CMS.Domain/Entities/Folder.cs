@@ -8,11 +8,6 @@ namespace CMS.Domain.Entities;
 public sealed class Folder : BaseAuditableEntity
 {
     /// <summary>
-    /// Unique identifier for the folder.
-    /// </summary>
-    public new Guid Id { get; private set; }
-
-    /// <summary>
     /// Folder name.
     /// </summary>
     public string Name { get; private set; } = null!;
@@ -20,7 +15,7 @@ public sealed class Folder : BaseAuditableEntity
     /// <summary>
     /// Parent folder ID (null for root folders).
     /// </summary>
-    public Guid? ParentId { get; private set; }
+    public int? ParentId { get; private set; }
 
     // Navigation properties
     public Folder? Parent { get; private set; }
@@ -37,13 +32,12 @@ public sealed class Folder : BaseAuditableEntity
     /// <summary>
     /// Creates a new folder.
     /// </summary>
-    public static Folder Create(string name, int createdByUserId, Guid? parentId = null)
+    public static Folder Create(string name, int createdByUserId, int? parentId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         return new Folder
         {
-            Id = Guid.NewGuid(),
             Name = name.Trim(),
             ParentId = parentId,
             CreatedByUserId = createdByUserId
@@ -62,7 +56,7 @@ public sealed class Folder : BaseAuditableEntity
     /// <summary>
     /// Moves the folder to a new parent.
     /// </summary>
-    public void MoveTo(Guid? newParentId)
+    public void MoveTo(int? newParentId)
     {
         ParentId = newParentId;
     }
