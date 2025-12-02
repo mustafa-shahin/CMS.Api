@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using CMS.Domain.Constants;
 using CMS.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;

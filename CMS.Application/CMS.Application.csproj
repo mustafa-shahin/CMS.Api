@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Features\Users\Commands\DeleteUser\DeleteUserCommand.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageReference Include="MediatR" Version="13.1.0" />
@@ -21,10 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CMS.Domain\CMS.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Features\Users\Commands\DeleteUser\DeleteUserCommand.cs" />
   </ItemGroup>
 
 </Project>

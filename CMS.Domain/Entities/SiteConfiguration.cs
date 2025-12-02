@@ -2,33 +2,69 @@
 using CMS.Domain.Enums;
 using System.Text.Json;
 
-namespace CMS.Domain.Entities
+namespace CMS.Domain.Entities;
+
+/// <summary>
+/// Represents a site configuration setting.
+/// </summary>
+public sealed class SiteConfiguration : BaseAuditableEntity
 {
-    public sealed class SiteConfiguration : BaseAuditableEntity
+    /// <summary>
+    /// Unique identifier for the configuration.
+    /// </summary>
+    public new Guid Id { get; private set; }
+
+    /// <summary>
+    /// Configuration key.
+    /// </summary>
+    public string Key { get; private set; } = null!;
+
+    /// <summary>
+    /// Configuration value as JSON.
+    /// </summary>
+    public JsonDocument Value { get; private set; } = null!;
+
+    /// <summary>
+    /// Configuration category.
+    /// </summary>
+    public ConfigurationCategory Category { get; private set; }
+
+    /// <summary>
+    /// User who last updated this configuration.
+    /// </summary>
+    public int? UpdatedByUserId { get; private set; }
+    public User? UpdatedByUser { get; private set; }
+
+    /// <summary>
+    /// Private constructor for EF Core.
+    /// </summary>
+    private SiteConfiguration() { }
+
+    /// <summary>
+    /// Creates a new site configuration.
+    /// </summary>
+    public static SiteConfiguration Create(string key, JsonDocument value, ConfigurationCategory category)
     {
-        public Guid Id { get; private set; }
-        public string Key { get; private set; } = null!;
-        public JsonDocument Value { get; private set; } = null!;
-        public ConfigurationCategory Category { get; private set; }
-        public Guid? UpdatedByUserId { get; private set; }
-        public User? UpdatedByUser { get; private set; }
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        ArgumentNullException.ThrowIfNull(value);
 
-        public static SiteConfiguration Create(string key, JsonDocument value, ConfigurationCategory category)
+        return new SiteConfiguration
         {
-            return new SiteConfiguration
-            {
-                Id = Guid.CreateVersion7(),
-                Key = key,
-                Value = value,
-                Category = category
-            };
-        }
-
-        public void UpdateValue(JsonDocument value, Guid updatedByUserId)
-        {
-            Value = value;
-            UpdatedByUserId = updatedByUserId;
-        }
+            Id = Guid.NewGuid(),
+            Key = key.Trim(),
+            Value = value,
+            Category = category
+        };
     }
 
+    /// <summary>
+    /// Updates the configuration value.
+    /// </summary>
+    public void UpdateValue(JsonDocument value, int updatedByUserId)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        Value = value;
+        UpdatedByUserId = updatedByUserId;
+    }
 }

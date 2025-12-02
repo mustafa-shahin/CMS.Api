@@ -78,7 +78,14 @@ public sealed class ExceptionHandlingMiddleware
             _logger.LogWarning("A handled exception occurred: {Message}", exception.Message);
         }
 
-        // Build response
+        // Determine detail (stack trace in development for 500 errors)
+        string? detail = null;
+        if (_environment.IsDevelopment() && statusCode == HttpStatusCode.InternalServerError)
+        {
+            detail = exception.ToString();
+        }
+
+        // Build response with all properties in object initializer
         var response = new ApiErrorResponse
         {
             Success = false,
@@ -87,14 +94,9 @@ public sealed class ExceptionHandlingMiddleware
             Message = message,
             Errors = errors,
             TraceId = context.TraceIdentifier,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow,
+            Detail = detail
         };
-
-        // Include stack trace in development
-        if (_environment.IsDevelopment() && statusCode == HttpStatusCode.InternalServerError)
-        {
-            response.Detail = exception.ToString();
-        }
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;

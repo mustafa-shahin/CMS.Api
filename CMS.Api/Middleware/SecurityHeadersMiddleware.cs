@@ -20,26 +20,26 @@ public sealed class SecurityHeadersMiddleware
         context.Response.Headers.Remove("X-Powered-By");
 
         // Prevent clickjacking attacks
-        context.Response.Headers.Append("X-Frame-Options", "DENY");
+        context.Response.Headers["X-Frame-Options"] = "DENY";
 
         // Enable browser's XSS filter (legacy but still useful)
-        context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+        context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
 
         // Prevent MIME type sniffing
-        context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
 
         // Control referrer information sent to other sites
-        context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+        context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
 
         // Content Security Policy - strict policy for API
-        context.Response.Headers.Append("Content-Security-Policy",
+        context.Response.Headers["Content-Security-Policy"] =
             "default-src 'none'; " +
             "frame-ancestors 'none'; " +
             "form-action 'none'; " +
-            "base-uri 'self'");
+            "base-uri 'self'";
 
         // Permissions policy (formerly Feature-Policy)
-        context.Response.Headers.Append("Permissions-Policy",
+        context.Response.Headers["Permissions-Policy"] =
             "accelerometer=(), " +
             "camera=(), " +
             "geolocation=(), " +
@@ -47,14 +47,14 @@ public sealed class SecurityHeadersMiddleware
             "magnetometer=(), " +
             "microphone=(), " +
             "payment=(), " +
-            "usb=()");
+            "usb=()";
 
         // Prevent caching of sensitive information
         if (context.Request.Path.StartsWithSegments("/api"))
         {
-            context.Response.Headers.Append("Cache-Control", "no-store, no-cache, must-revalidate");
-            context.Response.Headers.Append("Pragma", "no-cache");
-            context.Response.Headers.Append("Expires", "0");
+            context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            context.Response.Headers["Pragma"] = "no-cache";
+            context.Response.Headers["Expires"] = "0";
         }
 
         await _next(context);
