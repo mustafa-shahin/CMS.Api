@@ -54,3 +54,5 @@ TestResult.xml
 nunit-*.xml
 /.vs/CMS.Api.slnx/FileContentIndex
 /.vs/CMS.Api/CopilotIndices/18.3.180.61135
+.vs/
+*.suo
