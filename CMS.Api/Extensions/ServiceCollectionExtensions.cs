@@ -91,7 +91,9 @@ public static class ServiceCollectionExtensions
             .AddPolicy(Permissions.CanAccessDesigner, policy =>
                 policy.RequireRole(UserRole.Admin.ToString(), UserRole.Developer.ToString()))
             .AddPolicy(Permissions.CanManageUsers, policy =>
-                policy.RequireRole(UserRole.Admin.ToString()));
+                policy.RequireRole(UserRole.Admin.ToString()))
+            .AddPolicy(Permissions.CanManageConfiguration, policy =>
+                policy.RequireRole(UserRole.Admin.ToString(), UserRole.Developer.ToString()));
 
         // CORS
         var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
