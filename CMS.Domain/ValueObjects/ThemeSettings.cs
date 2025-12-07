@@ -23,7 +23,7 @@ public sealed record ThemeSettings
     /// <summary>
     /// Private constructor for EF Core and deserialization.
     /// </summary>
-    private ThemeSettings() { }
+    public ThemeSettings() { }
 
     /// <summary>
     /// Creates new theme settings with all color palettes.

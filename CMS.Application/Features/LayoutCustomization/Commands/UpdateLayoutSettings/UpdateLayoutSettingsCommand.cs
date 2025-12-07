@@ -61,7 +61,8 @@ public sealed class UpdateLayoutSettingsCommandHandler : IRequestHandler<UpdateL
             settings = CustomizationSettings.Create(
                 ThemeSettings.CreateDefault(),
                 TypographySettings.CreateDefault(),
-                layoutSettings
+                layoutSettings,
+                BrandingSettings.CreateDefault()
             );
             _context.CustomizationSettings.Add(settings);
         }

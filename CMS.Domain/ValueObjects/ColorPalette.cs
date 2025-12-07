@@ -24,7 +24,7 @@ public sealed record ColorPalette
     /// <summary>
     /// Private constructor for EF Core and deserialization.
     /// </summary>
-    private ColorPalette() { }
+    public ColorPalette() { }
 
     /// <summary>
     /// Creates a new color palette with the specified color schemes.

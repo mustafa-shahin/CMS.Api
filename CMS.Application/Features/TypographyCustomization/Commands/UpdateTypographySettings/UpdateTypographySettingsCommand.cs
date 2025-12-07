@@ -58,7 +58,8 @@ public sealed class UpdateTypographySettingsCommandHandler : IRequestHandler<Upd
             settings = CustomizationSettings.Create(
                 ThemeSettings.CreateDefault(),
                 typographySettings,
-                LayoutSettings.CreateDefault()
+                LayoutSettings.CreateDefault(),
+                BrandingSettings.CreateDefault()
             );
             _context.CustomizationSettings.Add(settings);
         }

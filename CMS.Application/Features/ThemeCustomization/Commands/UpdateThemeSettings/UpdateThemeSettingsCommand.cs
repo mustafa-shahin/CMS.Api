@@ -37,21 +37,53 @@ public sealed class UpdateThemeSettingsCommandValidator : AbstractValidator<Upda
         RuleFor(x => x.ThemeSettings.SemanticPalette)
             .NotNull().WithMessage("Semantic palette is required.");
 
-        // Validate all color schemes
-        RuleForEach(x => new[]
+        // Validate Brand Palette color schemes
+        When(x => x.ThemeSettings.BrandPalette != null, () =>
         {
-            x.ThemeSettings.BrandPalette != null ? x.ThemeSettings.BrandPalette.Primary : null,
-            x.ThemeSettings.BrandPalette != null ? x.ThemeSettings.BrandPalette.Secondary : null,
-            x.ThemeSettings.BrandPalette != null ? x.ThemeSettings.BrandPalette.Accent : null,
-            x.ThemeSettings.NeutralPalette != null ? x.ThemeSettings.NeutralPalette.Primary : null,
-            x.ThemeSettings.NeutralPalette != null ? x.ThemeSettings.NeutralPalette.Secondary : null,
-            x.ThemeSettings.NeutralPalette != null ? x.ThemeSettings.NeutralPalette.Accent : null,
-            x.ThemeSettings.SemanticPalette != null ? x.ThemeSettings.SemanticPalette.Primary : null,
-            x.ThemeSettings.SemanticPalette != null ? x.ThemeSettings.SemanticPalette.Secondary : null,
-            x.ThemeSettings.SemanticPalette != null ? x.ThemeSettings.SemanticPalette.Accent : null
-        })
-        .Must(scheme => scheme == null || IsValidColorScheme(scheme))
-        .WithMessage("All color values must be valid hex colors.");
+            RuleFor(x => x.ThemeSettings.BrandPalette!.Primary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Brand palette primary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.BrandPalette!.Secondary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Brand palette secondary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.BrandPalette!.Accent)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Brand palette accent colors must be valid hex colors.");
+        });
+
+        // Validate Neutral Palette color schemes
+        When(x => x.ThemeSettings.NeutralPalette != null, () =>
+        {
+            RuleFor(x => x.ThemeSettings.NeutralPalette!.Primary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Neutral palette primary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.NeutralPalette!.Secondary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Neutral palette secondary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.NeutralPalette!.Accent)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Neutral palette accent colors must be valid hex colors.");
+        });
+
+        // Validate Semantic Palette color schemes
+        When(x => x.ThemeSettings.SemanticPalette != null, () =>
+        {
+            RuleFor(x => x.ThemeSettings.SemanticPalette!.Primary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Semantic palette primary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.SemanticPalette!.Secondary)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Semantic palette secondary colors must be valid hex colors.");
+
+            RuleFor(x => x.ThemeSettings.SemanticPalette!.Accent)
+                .Must(IsValidColorScheme!)
+                .WithMessage("Semantic palette accent colors must be valid hex colors.");
+        });
     }
 
     private static bool IsValidColorScheme(ColorSchemeDto scheme)
@@ -95,11 +127,12 @@ public sealed class UpdateThemeSettingsCommandHandler : IRequestHandler<UpdateTh
 
         if (settings is null)
         {
-            // Create new settings with default typography and layout
+            // Create new settings with default typography, layout, and branding
             settings = CustomizationSettings.Create(
                 themeSettings,
                 TypographySettings.CreateDefault(),
-                LayoutSettings.CreateDefault()
+                LayoutSettings.CreateDefault(),
+                BrandingSettings.CreateDefault()
             );
 
             _context.CustomizationSettings.Add(settings);

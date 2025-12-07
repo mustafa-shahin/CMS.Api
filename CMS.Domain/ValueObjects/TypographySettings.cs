@@ -30,7 +30,7 @@ public sealed record TypographySettings
     /// <summary>
     /// Private constructor for EF Core and deserialization.
     /// </summary>
-    private TypographySettings() { }
+    public TypographySettings() { }
 
     /// <summary>
     /// Creates new typography settings.

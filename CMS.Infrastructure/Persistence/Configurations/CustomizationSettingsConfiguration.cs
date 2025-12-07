@@ -21,10 +21,12 @@ public sealed class CustomizationSettingsConfiguration : IEntityTypeConfiguratio
             .UseIdentityAlwaysColumn();
 
         builder.Property(cs => cs.IsActive)
+            .HasColumnName("is_active")
             .IsRequired()
             .HasDefaultValue(true);
 
         builder.Property(cs => cs.Version)
+            .HasColumnName("version")
             .IsRequired()
             .HasDefaultValue(1)
             .IsConcurrencyToken(); // Optimistic concurrency control
@@ -48,15 +50,25 @@ public sealed class CustomizationSettingsConfiguration : IEntityTypeConfiguratio
             .HasConversion(ValueObjectJsonConverters.LayoutSettingsConverter)
             .IsRequired();
 
-        // Audit fields
-        builder.Property(cs => cs.CreatedAt)
+        builder.Property(cs => cs.BrandingConfiguration)
+            .HasColumnType("jsonb")
+            .HasColumnName("branding_configuration")
+            .HasConversion(ValueObjectJsonConverters.BrandingSettingsConverter)
             .IsRequired();
 
-        builder.Property(cs => cs.CreatedBy);
+        // Audit fields
+        builder.Property(cs => cs.CreatedAt)
+            .HasColumnName("created_at")
+            .IsRequired();
 
-        builder.Property(cs => cs.LastModifiedAt);
+        builder.Property(cs => cs.CreatedBy)
+            .HasColumnName("created_by");
 
-        builder.Property(cs => cs.LastModifiedBy);
+        builder.Property(cs => cs.LastModifiedAt)
+            .HasColumnName("last_modified_at");
+
+        builder.Property(cs => cs.LastModifiedBy)
+            .HasColumnName("last_modified_by");
 
         // Relationships
         builder.HasOne(cs => cs.UpdatedByUser)
@@ -65,9 +77,11 @@ public sealed class CustomizationSettingsConfiguration : IEntityTypeConfiguratio
             .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(cs => cs.IsActive);
+        builder.HasIndex(cs => cs.IsActive)
+            .HasDatabaseName("ix_customization_settings_is_active");
 
-        builder.HasIndex(cs => cs.LastModifiedAt);
+        builder.HasIndex(cs => cs.LastModifiedAt)
+            .HasDatabaseName("ix_customization_settings_last_modified_at");
 
         // Unique constraint: Only one active configuration at a time
         builder.HasIndex(cs => cs.IsActive)

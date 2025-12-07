@@ -12,7 +12,7 @@ public sealed record HeaderOptions
     public bool ShowSearch { get; init; }
     public bool StickyHeader { get; init; }
 
-    private HeaderOptions() { }
+    public HeaderOptions() { }
 
     public static HeaderOptions Create(
         HeaderTemplate template,
@@ -51,7 +51,7 @@ public sealed record FooterOptions
     public bool ShowSocialLinks { get; init; }
     public bool ShowNewsletter { get; init; }
 
-    private FooterOptions() { }
+    public FooterOptions() { }
 
     public static FooterOptions Create(
         FooterTemplate template,
@@ -103,7 +103,7 @@ public sealed record SpacingConfiguration
     /// </summary>
     public decimal ComponentGap { get; init; }
 
-    private SpacingConfiguration() { }
+    public SpacingConfiguration() { }
 
     public static SpacingConfiguration Create(int containerMaxWidth, decimal sectionPadding, decimal componentGap)
     {
@@ -144,7 +144,7 @@ public sealed record LayoutSettings
     public FooterOptions FooterConfiguration { get; init; } = null!;
     public SpacingConfiguration Spacing { get; init; } = null!;
 
-    private LayoutSettings() { }
+    public LayoutSettings() { }
 
     public static LayoutSettings Create(
         HeaderOptions headerConfiguration,

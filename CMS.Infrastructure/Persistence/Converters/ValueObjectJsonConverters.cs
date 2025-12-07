@@ -32,4 +32,10 @@ public static class ValueObjectJsonConverters
             v => JsonSerializer.Serialize(v, JsonOptions),
             v => JsonSerializer.Deserialize<LayoutSettings>(v, JsonOptions)!
         );
+
+    public static ValueConverter<BrandingSettings, string> BrandingSettingsConverter =>
+        new(
+            v => JsonSerializer.Serialize(v, JsonOptions),
+            v => JsonSerializer.Deserialize<BrandingSettings>(v, JsonOptions)!
+        );
 }

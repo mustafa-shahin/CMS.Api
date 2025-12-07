@@ -36,6 +36,11 @@ public sealed class CustomizationSettings : BaseAuditableEntity
     public LayoutSettings LayoutConfiguration { get; private set; } = null!;
 
     /// <summary>
+    /// Branding configuration including logo, favicon, and site identity.
+    /// </summary>
+    public BrandingSettings BrandingConfiguration { get; private set; } = null!;
+
+    /// <summary>
     /// Navigation property to the user who last updated this configuration.
     /// </summary>
     public User? UpdatedByUser { get; private set; }
@@ -51,23 +56,27 @@ public sealed class CustomizationSettings : BaseAuditableEntity
     /// <param name="themeConfiguration">Theme settings.</param>
     /// <param name="typographyConfiguration">Typography settings.</param>
     /// <param name="layoutConfiguration">Layout settings.</param>
+    /// <param name="brandingConfiguration">Branding settings.</param>
     /// <param name="isActive">Whether this should be the active configuration.</param>
     /// <returns>A new CustomizationSettings instance.</returns>
     public static CustomizationSettings Create(
         ThemeSettings themeConfiguration,
         TypographySettings typographyConfiguration,
         LayoutSettings layoutConfiguration,
+        BrandingSettings brandingConfiguration,
         bool isActive = true)
     {
         ArgumentNullException.ThrowIfNull(themeConfiguration, nameof(themeConfiguration));
         ArgumentNullException.ThrowIfNull(typographyConfiguration, nameof(typographyConfiguration));
         ArgumentNullException.ThrowIfNull(layoutConfiguration, nameof(layoutConfiguration));
+        ArgumentNullException.ThrowIfNull(brandingConfiguration, nameof(brandingConfiguration));
 
         return new CustomizationSettings
         {
             ThemeConfiguration = themeConfiguration,
             TypographyConfiguration = typographyConfiguration,
             LayoutConfiguration = layoutConfiguration,
+            BrandingConfiguration = brandingConfiguration,
             IsActive = isActive,
             Version = 1
         };
@@ -83,6 +92,7 @@ public sealed class CustomizationSettings : BaseAuditableEntity
             ThemeConfiguration = ThemeSettings.CreateDefault(),
             TypographyConfiguration = TypographySettings.CreateDefault(),
             LayoutConfiguration = LayoutSettings.CreateDefault(),
+            BrandingConfiguration = BrandingSettings.CreateDefault(),
             IsActive = true,
             Version = 1
         };
@@ -134,21 +144,39 @@ public sealed class CustomizationSettings : BaseAuditableEntity
     }
 
     /// <summary>
+    /// Updates the branding configuration.
+    /// </summary>
+    /// <param name="brandingConfiguration">New branding configuration.</param>
+    /// <param name="updatedByUserId">ID of the user making the update.</param>
+    public void UpdateBranding(BrandingSettings brandingConfiguration, int updatedByUserId)
+    {
+        ArgumentNullException.ThrowIfNull(brandingConfiguration, nameof(brandingConfiguration));
+
+        BrandingConfiguration = brandingConfiguration;
+        LastModifiedBy = updatedByUserId;
+        LastModifiedAt = DateTime.UtcNow;
+        Version++;
+    }
+
+    /// <summary>
     /// Updates all configurations at once.
     /// </summary>
     public void UpdateAll(
         ThemeSettings themeConfiguration,
         TypographySettings typographyConfiguration,
         LayoutSettings layoutConfiguration,
+        BrandingSettings brandingConfiguration,
         int updatedByUserId)
     {
         ArgumentNullException.ThrowIfNull(themeConfiguration, nameof(themeConfiguration));
         ArgumentNullException.ThrowIfNull(typographyConfiguration, nameof(typographyConfiguration));
         ArgumentNullException.ThrowIfNull(layoutConfiguration, nameof(layoutConfiguration));
+        ArgumentNullException.ThrowIfNull(brandingConfiguration, nameof(brandingConfiguration));
 
         ThemeConfiguration = themeConfiguration;
         TypographyConfiguration = typographyConfiguration;
         LayoutConfiguration = layoutConfiguration;
+        BrandingConfiguration = brandingConfiguration;
         LastModifiedBy = updatedByUserId;
         LastModifiedAt = DateTime.UtcNow;
         Version++;
@@ -179,6 +207,7 @@ public sealed class CustomizationSettings : BaseAuditableEntity
         ThemeConfiguration = ThemeSettings.CreateDefault();
         TypographyConfiguration = TypographySettings.CreateDefault();
         LayoutConfiguration = LayoutSettings.CreateDefault();
+        BrandingConfiguration = BrandingSettings.CreateDefault();
         LastModifiedBy = updatedByUserId;
         LastModifiedAt = DateTime.UtcNow;
         Version++;

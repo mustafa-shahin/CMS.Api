@@ -40,7 +40,7 @@ public sealed record TextStyle
     /// <summary>
     /// Private constructor for EF Core and deserialization.
     /// </summary>
-    private TextStyle() { }
+    public TextStyle() { }
 
     /// <summary>
     /// Creates a new text style with validation.

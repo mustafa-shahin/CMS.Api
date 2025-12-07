@@ -40,6 +40,11 @@ public interface IApplicationDbContext
     DbSet<FileEntity> Files { get; }
 
     /// <summary>
+    /// Images table.
+    /// </summary>
+    DbSet<ImageEntity> Images { get; }
+
+    /// <summary>
     /// Folders table.
     /// </summary>
     DbSet<Folder> Folders { get; }

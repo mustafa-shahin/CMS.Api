@@ -8,7 +8,7 @@ namespace CMS.Domain.ValueObjects;
 /// </summary>
 public sealed partial record ColorScheme
 {
-    private static readonly Regex HexColorRegex = GenerateHexColorRegex();
+    public static readonly Regex HexColorRegex = GenerateHexColorRegex();
 
     /// <summary>
     /// The base color in hexadecimal format (#RGB or #RRGGBB).
@@ -33,7 +33,7 @@ public sealed partial record ColorScheme
     /// <summary>
     /// Private constructor for EF Core and deserialization.
     /// </summary>
-    private ColorScheme() { }
+    public ColorScheme() { }
 
     /// <summary>
     /// Creates a new color scheme with the specified base color.
@@ -177,5 +177,5 @@ public sealed partial record ColorScheme
     }
 
     [GeneratedRegex(@"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")]
-    private static partial Regex GenerateHexColorRegex();
+    public static partial Regex GenerateHexColorRegex();
 }
