@@ -50,6 +50,11 @@ public interface IApplicationDbContext
     DbSet<SiteConfiguration> SiteConfigurations { get; }
 
     /// <summary>
+    /// Customization settings table.
+    /// </summary>
+    DbSet<CustomizationSettings> CustomizationSettings { get; }
+
+    /// <summary>
     /// Saves all changes made in this context to the database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

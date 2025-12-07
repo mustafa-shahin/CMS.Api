@@ -34,6 +34,7 @@ public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FileEntity> Files => Set<FileEntity>();
     public DbSet<Folder> Folders => Set<Folder>();
     public DbSet<SiteConfiguration> SiteConfigurations => Set<SiteConfiguration>();
+    public DbSet<CustomizationSettings> CustomizationSettings => Set<CustomizationSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
