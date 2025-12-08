@@ -1,3 +1,4 @@
+using CMS.Api.Attributes;
 using Asp.Versioning;
 using CMS.Application.Common.Models;
 using CMS.Application.Features.LayoutCustomization.Commands.UpdateLayoutSettings;
@@ -88,12 +89,15 @@ public sealed class LayoutCustomizationController : ControllerBase
     /// <response code="400">Invalid input - Validation errors</response>
     /// <response code="401">Unauthorized - Authentication required</response>
     /// <response code="403">Forbidden - Insufficient permissions</response>
+    /// <response code="429">Too Many Requests - Rate limit exceeded</response>
     [HttpPut]
     [Authorize(Policy = Permissions.CanManageConfiguration)]
+    [RateLimit(Requests = 20, PerMinutes = 1)]
     [ProducesResponseType(typeof(ApiResponse<LayoutSettingsDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> UpdateLayoutSettings([FromBody] UpdateLayoutSettingsCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation("PUT /api/v1/customization/layout - Updating layout settings");

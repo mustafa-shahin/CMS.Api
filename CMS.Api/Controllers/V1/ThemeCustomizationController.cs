@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using CMS.Api.Attributes;
 using CMS.Application.Common.Models;
 using CMS.Application.Features.ThemeCustomization.Commands.UpdateThemeSettings;
 using CMS.Application.Features.ThemeCustomization.DTOs;
@@ -85,12 +86,15 @@ public sealed class ThemeCustomizationController : ControllerBase
     /// <response code="400">Invalid input - Validation errors</response>
     /// <response code="401">Unauthorized - Authentication required</response>
     /// <response code="403">Forbidden - Insufficient permissions</response>
+    /// <response code="429">Too Many Requests - Rate limit exceeded</response>
     [HttpPut]
     [Authorize(Policy = Permissions.CanManageConfiguration)]
+    [RateLimit(Requests = 20, PerMinutes = 1)]
     [ProducesResponseType(typeof(ApiResponse<ThemeSettingsDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> UpdateThemeSettings([FromBody] UpdateThemeSettingsCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation("PUT /api/v1/customization/theme - Updating theme settings");

@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using CMS.Api.Attributes;
 using CMS.Application.Common.Models;
 using CMS.Application.Features.Styles.Commands.UpdateStyleSettings;
 using CMS.Application.Features.Styles.DTOs;
@@ -72,12 +73,15 @@ public sealed class StylesController : ControllerBase
     /// <response code="400">Invalid input - Validation errors</response>
     /// <response code="401">Unauthorized - Authentication required</response>
     /// <response code="403">Forbidden - Insufficient permissions</response>
+    /// <response code="429">Too Many Requests - Rate limit exceeded</response>
     [HttpPut]
     [Authorize(Policy = Permissions.CanManageConfiguration)]
+    [RateLimit(Requests = 20, PerMinutes = 1)] // Allow 20 updates per minute
     [ProducesResponseType(typeof(ApiResponse<StyleSettingsDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> UpdateStyleSettings(
         [FromBody] UpdateStyleSettingsCommand command,
         CancellationToken cancellationToken)
