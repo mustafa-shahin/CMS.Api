@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using CMS.Application.Common.Exceptions;
 using CMS.Application.Common.Interfaces;
+using CMS.Application.Common.Validators;
 using CMS.Application.Features.Styles.DTOs;
 using CMS.Domain.Entities;
 using CMS.Domain.Enums;
@@ -152,6 +153,66 @@ public sealed class UpdateStyleSettingsCommandValidator : AbstractValidator<Upda
                 .Matches(HexColorRegex).WithMessage("Error color must be a valid hex color (e.g., #ef4444).")
                 .MaximumLength(7).WithMessage("Error color must not exceed 7 characters.");
         });
+
+        // WCAG Accessibility Validation - Text on Navbar
+        RuleFor(x => x)
+            .Must(x => ValidateTextOnBackground(x.TextColor, x.NavbarBackground))
+            .WithMessage(x => $"Text color on navbar background does not meet WCAG AA standards. " +
+                             $"Current contrast ratio: {GetContrastRatio(x.TextColor, x.NavbarBackground):F2}:1 " +
+                             $"(minimum required: {ColorContrastValidator.WcagAaMinimumRatio}:1). " +
+                             $"Consider using a lighter or darker text color.")
+            .WithSeverity(Severity.Warning);
+
+        // WCAG Accessibility Validation - Headings on Navbar
+        RuleFor(x => x)
+            .Must(x => ValidateTextOnBackground(x.HeadingColor, x.NavbarBackground))
+            .WithMessage(x => $"Heading color on navbar background does not meet WCAG AA standards. " +
+                             $"Contrast ratio: {GetContrastRatio(x.HeadingColor, x.NavbarBackground):F2}:1")
+            .WithSeverity(Severity.Warning);
+
+        // WCAG Accessibility Validation - Text on Footer
+        RuleFor(x => x)
+            .Must(x => ValidateTextOnBackground(x.TextColor, x.FooterBackground))
+            .WithMessage(x => $"Text color on footer background does not meet WCAG AA standards. " +
+                             $"Contrast ratio: {GetContrastRatio(x.TextColor, x.FooterBackground):F2}:1")
+            .WithSeverity(Severity.Warning);
+
+        // WCAG Accessibility Validation - Link visibility
+        RuleFor(x => x)
+            .Must(x => ValidateTextOnBackground(x.LinkColor, x.NavbarBackground))
+            .WithMessage("Link color should be distinguishable from navbar background for accessibility")
+            .WithSeverity(Severity.Warning);
+    }
+
+    /// <summary>
+    /// Validate text has sufficient contrast on background (WCAG AA: 4.5:1)
+    /// </summary>
+    private bool ValidateTextOnBackground(string textColor, string backgroundColor)
+    {
+        try
+        {
+            return ColorContrastValidator.MeetsWcagAa(textColor, backgroundColor);
+        }
+        catch
+        {
+            // If validation fails (invalid color), let other validators handle it
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Get contrast ratio for error messages
+    /// </summary>
+    private double GetContrastRatio(string foreground, string background)
+    {
+        try
+        {
+            return ColorContrastValidator.CalculateContrastRatio(foreground, background);
+        }
+        catch
+        {
+            return 0;
+        }
     }
 }
 
@@ -180,83 +241,110 @@ public sealed class UpdateStyleSettingsCommandHandler : IRequestHandler<UpdateSt
 
     public async Task<StyleSettingsDto> Handle(UpdateStyleSettingsCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Updating style settings for user {UserId}: PrimaryColor={PrimaryColor}, SecondaryColor={SecondaryColor}",
-            _currentUser.UserId, request.PrimaryColor, request.SecondaryColor);
-
-        // Get or create the style settings configuration
-        var configuration = await _context.SiteConfigurations
-            .FirstOrDefaultAsync(c => c.Key == StyleSettingsKey, cancellationToken);
-
-        var styleData = new
+        try
         {
-            primaryColor = request.PrimaryColor,
-            secondaryColor = request.SecondaryColor,
-            navbarBackground = request.NavbarBackground,
-            footerBackground = request.FooterBackground,
-            textColor = request.TextColor,
-            headingColor = request.HeadingColor,
-            linkColor = request.LinkColor,
-            linkHoverColor = request.LinkHoverColor,
-            linkVisitedColor = request.LinkVisitedColor,
-            successColor = request.SuccessColor ?? "#10b981",
-            warningColor = request.WarningColor ?? "#f59e0b",
-            errorColor = request.ErrorColor ?? "#ef4444"
-        };
+            _logger.LogInformation(
+                "User {UserId} is updating style settings",
+                _currentUser.UserId);
 
-        var jsonValue = JsonDocument.Parse(JsonSerializer.Serialize(styleData));
+            // Get or create the style settings configuration
+            var configuration = await _context.SiteConfigurations
+                .FirstOrDefaultAsync(c => c.Key == StyleSettingsKey, cancellationToken);
 
-        if (configuration is null)
-        {
-            // Create new configuration
-            configuration = SiteConfiguration.Create(
-                key: StyleSettingsKey,
-                value: jsonValue,
-                category: ConfigurationCategory.Layout);
+            var styleData = new
+            {
+                primaryColor = request.PrimaryColor,
+                secondaryColor = request.SecondaryColor,
+                navbarBackground = request.NavbarBackground,
+                footerBackground = request.FooterBackground,
+                textColor = request.TextColor,
+                headingColor = request.HeadingColor,
+                linkColor = request.LinkColor,
+                linkHoverColor = request.LinkHoverColor,
+                linkVisitedColor = request.LinkVisitedColor,
+                successColor = request.SuccessColor ?? "#10b981",
+                warningColor = request.WarningColor ?? "#f59e0b",
+                errorColor = request.ErrorColor ?? "#ef4444"
+            };
 
-            _context.SiteConfigurations.Add(configuration);
+            var jsonValue = JsonDocument.Parse(JsonSerializer.Serialize(styleData));
 
-            _logger.LogInformation("Created new style settings configuration");
+            if (configuration is null)
+            {
+                // Create new configuration
+                configuration = SiteConfiguration.Create(
+                    key: StyleSettingsKey,
+                    value: jsonValue,
+                    category: ConfigurationCategory.Layout);
+
+                _context.SiteConfigurations.Add(configuration);
+
+                _logger.LogInformation("Created new style settings configuration");
+            }
+            else
+            {
+                // Update existing configuration
+                configuration.UpdateValue(jsonValue, _currentUser.UserId.Value);
+
+                _logger.LogInformation(
+                    "Updated style settings configuration (ID: {ConfigId})",
+                    configuration.Id);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Style settings saved successfully");
+
+            // Get the updated user info for response
+            string? updatedByUserName = null;
+            if (_currentUser.UserId.HasValue)
+            {
+                var user = await _context.Users
+                    .Where(u => u.Id == _currentUser.UserId.Value)
+                    .Select(u => u.FirstName + " " + u.LastName)
+                    .FirstOrDefaultAsync(cancellationToken);
+                updatedByUserName = user;
+            }
+
+            return new StyleSettingsDto
+            {
+                PrimaryColor = request.PrimaryColor,
+                SecondaryColor = request.SecondaryColor,
+                NavbarBackground = request.NavbarBackground,
+                FooterBackground = request.FooterBackground,
+                TextColor = request.TextColor,
+                HeadingColor = request.HeadingColor,
+                LinkColor = request.LinkColor,
+                LinkHoverColor = request.LinkHoverColor,
+                LinkVisitedColor = request.LinkVisitedColor,
+                SuccessColor = request.SuccessColor ?? "#10b981",
+                WarningColor = request.WarningColor ?? "#f59e0b",
+                ErrorColor = request.ErrorColor ?? "#ef4444",
+                LastUpdatedAt = configuration.LastModifiedAt,
+                LastUpdatedBy = updatedByUserName
+            };
         }
-        else
+        catch (DbUpdateException ex)
         {
-            // Update existing configuration
-            configuration.UpdateValue(jsonValue, _currentUser.UserId.Value);
+            _logger.LogError(
+                ex,
+                "Database error while updating style settings for user {UserId}",
+                _currentUser.UserId);
 
-            _logger.LogInformation("Updated existing style settings configuration with ID {ConfigId}", configuration.Id);
+            throw new InvalidOperationException(
+                "Failed to save style settings. Please try again later.",
+                ex);
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Style settings saved successfully");
-
-        // Get the updated user info for response
-        string? updatedByUserName = null;
-        if (_currentUser.UserId.HasValue)
+        catch (Exception ex)
         {
-            var user = await _context.Users
-                .Where(u => u.Id == _currentUser.UserId.Value)
-                .Select(u => u.FirstName + " " + u.LastName)
-                .FirstOrDefaultAsync(cancellationToken);
-            updatedByUserName = user;
+            _logger.LogError(
+                ex,
+                "Unexpected error while updating style settings for user {UserId}",
+                _currentUser.UserId);
+
+            throw new InvalidOperationException(
+                "An error occurred while saving style settings. Please contact support if the issue persists.",
+                ex);
         }
-
-        return new StyleSettingsDto
-        {
-            PrimaryColor = request.PrimaryColor,
-            SecondaryColor = request.SecondaryColor,
-            NavbarBackground = request.NavbarBackground,
-            FooterBackground = request.FooterBackground,
-            TextColor = request.TextColor,
-            HeadingColor = request.HeadingColor,
-            LinkColor = request.LinkColor,
-            LinkHoverColor = request.LinkHoverColor,
-            LinkVisitedColor = request.LinkVisitedColor,
-            SuccessColor = request.SuccessColor ?? "#10b981",
-            WarningColor = request.WarningColor ?? "#f59e0b",
-            ErrorColor = request.ErrorColor ?? "#ef4444",
-            LastUpdatedAt = configuration.LastModifiedAt,
-            LastUpdatedBy = updatedByUserName
-        };
     }
 }

@@ -32,8 +32,10 @@ public sealed class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<PageVersion> PageVersions => Set<PageVersion>();
     public DbSet<FileEntity> Files => Set<FileEntity>();
+    public DbSet<ImageEntity> Images => Set<ImageEntity>();
     public DbSet<Folder> Folders => Set<Folder>();
     public DbSet<SiteConfiguration> SiteConfigurations => Set<SiteConfiguration>();
+    public DbSet<CustomizationSettings> CustomizationSettings => Set<CustomizationSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

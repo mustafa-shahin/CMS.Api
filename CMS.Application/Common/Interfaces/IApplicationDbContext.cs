@@ -40,6 +40,11 @@ public interface IApplicationDbContext
     DbSet<FileEntity> Files { get; }
 
     /// <summary>
+    /// Images table.
+    /// </summary>
+    DbSet<ImageEntity> Images { get; }
+
+    /// <summary>
     /// Folders table.
     /// </summary>
     DbSet<Folder> Folders { get; }
@@ -48,6 +53,11 @@ public interface IApplicationDbContext
     /// Site configurations table.
     /// </summary>
     DbSet<SiteConfiguration> SiteConfigurations { get; }
+
+    /// <summary>
+    /// Customization settings table.
+    /// </summary>
+    DbSet<CustomizationSettings> CustomizationSettings { get; }
 
     /// <summary>
     /// Saves all changes made in this context to the database.

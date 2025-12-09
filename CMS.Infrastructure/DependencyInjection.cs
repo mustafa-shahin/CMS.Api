@@ -52,6 +52,7 @@ public static class DependencyInjection
 
         // Other services
         services.AddSingleton<IDateTimeService, DateTimeService>();
+        services.AddScoped<IImageProcessingService, ImageProcessingService>();
 
         // JWT Authentication
         services.AddAuthentication(options =>
