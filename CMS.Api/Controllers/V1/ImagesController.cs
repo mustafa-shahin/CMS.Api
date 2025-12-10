@@ -1,6 +1,11 @@
 using Asp.Versioning;
+using CMS.Application.Common.Models;
+using CMS.Application.Features.Media.Commands.DeleteImage;
+using CMS.Application.Features.Media.Commands.UpdateImage;
 using CMS.Application.Features.Media.Commands.UploadImage;
+using CMS.Application.Features.Media.DTOs;
 using CMS.Application.Features.Media.Queries.GetImage;
+using CMS.Application.Features.Media.Queries.GetImagesWithPagination;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +28,47 @@ public sealed class ImagesController : ControllerBase
     {
         _mediator = mediator;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Get all images with pagination.
+    /// </summary>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 12)</param>
+    /// <param name="searchTerm">Optional search term</param>
+    /// <param name="folderId">Optional folder filter</param>
+    /// <param name="contentType">Optional content type filter</param>
+    /// <param name="sortBy">Sort field (name, size, createdAt)</param>
+    /// <param name="sortDescending">Sort direction (default: true)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Paginated list of images</returns>
+    [HttpGet]
+    [Authorize]
+    [ProducesResponseType(typeof(PaginatedList<ImageListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PaginatedList<ImageListDto>>> GetImages(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] int? folderId = null,
+        [FromQuery] string? contentType = null,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDescending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetImagesWithPaginationQuery
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            SearchTerm = searchTerm,
+            FolderId = folderId,
+            ContentType = contentType,
+            SortBy = sortBy,
+            SortDescending = sortDescending
+        };
+
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -104,13 +150,59 @@ public sealed class ImagesController : ControllerBase
     }
 
     /// <summary>
+    /// Update image metadata.
+    /// </summary>
+    /// <param name="id">Image ID</param>
+    /// <param name="command">Update data</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Updated image information</returns>
+    [HttpPut("{id}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ImageListDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ImageListDto>> UpdateImage(
+        int id,
+        [FromBody] UpdateImageCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("ID in URL does not match ID in request body.");
+        }
+
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Delete an image.
+    /// </summary>
+    /// <param name="id">Image ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>No content on success</returns>
+    [HttpDelete("{id}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteImage(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new DeleteImageCommand(id), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Get image data by ID.
     /// </summary>
     /// <param name="id">Image ID</param>
     /// <param name="variant">Image variant (original, thumbnail, medium)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Image file</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id}/file")]
     [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)] // Cache for 1 hour
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -169,4 +261,38 @@ public sealed class ImagesController : ControllerBase
     {
         return await GetImage(id, ImageVariant.Medium, cancellationToken);
     }
+
+    /// <summary>
+    /// Download an image file.
+    /// </summary>
+    /// <param name="id">Image ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Image file as download attachment</returns>
+    [HttpGet("{id}/download")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadImage(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetImageQuery
+        {
+            ImageId = id,
+            Variant = ImageVariant.Original
+        };
+
+        var response = await _mediator.Send(query, cancellationToken);
+        if (response == null)
+        {
+            return NotFound();
+        }
+
+        // Set Content-Disposition to attachment for download
+        Response.Headers.ContentDisposition = $"attachment; filename=\"{response.FileName}\"";
+
+        return File(response.Data, response.ContentType, response.FileName);
+    }
 }
+
