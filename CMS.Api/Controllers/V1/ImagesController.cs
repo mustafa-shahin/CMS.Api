@@ -1,15 +1,18 @@
+using Asp.Versioning;
 using CMS.Application.Features.Media.Commands.UploadImage;
 using CMS.Application.Features.Media.Queries.GetImage;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CMS.Api.Controllers;
+namespace CMS.Api.Controllers.V1;
 
 /// <summary>
 /// Controller for managing images.
 /// </summary>
 [ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [Route("api/[controller]")]
 public sealed class ImagesController : ControllerBase
 {
