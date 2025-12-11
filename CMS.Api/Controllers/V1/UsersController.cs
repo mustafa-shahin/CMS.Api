@@ -7,6 +7,7 @@ using CMS.Application.Features.Users.Commands.DeleteUser;
 using CMS.Application.Features.Users.Commands.UpdateUser;
 using CMS.Application.Features.Users.DTOs;
 using CMS.Application.Features.Users.Queries;
+using CMS.Application.Common.Models.Search;
 using CMS.Domain.Constants;
 using CMS.Domain.Enums;
 using MediatR;
@@ -75,6 +76,29 @@ public sealed class UsersController : ControllerBase
 
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(PaginatedResponse<UserListDto>.FromPaginatedList(result));
+    }
+
+    /// <summary>
+    /// Advanced search for users with full-text search, filtering, sorting, and paging.
+    /// </summary>
+    /// <param name="request">Search request with filters, sorts, and search term.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Search result with users.</returns>
+    /// <response code="200">Users retrieved successfully.</response>
+    /// <response code="400">Invalid search request.</response>
+    /// <response code="401">Not authenticated.</response>
+    /// <response code="403">Not authorized to manage users.</response>
+    [HttpPost("search")]
+    [ProducesResponseType(typeof(ApiResponse<SearchResult<UserListDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> SearchUsers(
+        [FromBody] SearchUsersQuery request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        return Ok(ApiResponse<SearchResult<UserListDto>>.SuccessResponse(result));
     }
 
     /// <summary>

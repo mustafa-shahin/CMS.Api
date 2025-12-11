@@ -4,6 +4,10 @@ using CMS.Application.Features.Media.Commands.DeleteImage;
 using CMS.Application.Features.Media.Commands.UpdateImage;
 using CMS.Application.Features.Media.Commands.UploadImage;
 using CMS.Application.Features.Media.DTOs;
+using CMS.Application.Common.Models.Search;
+using CMS.Application.Features.Media.Commands.UploadImage;
+using CMS.Application.Features.Media.DTOs;
+using CMS.Application.Features.Media.Queries;
 using CMS.Application.Features.Media.Queries.GetImage;
 using CMS.Application.Features.Media.Queries.GetImagesWithPagination;
 using MediatR;
@@ -69,6 +73,25 @@ public sealed class ImagesController : ControllerBase
 
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
+    /// Advanced search for images with full-text search, filtering, sorting, and paging.
+    /// </summary>
+    /// <param name="request">Search request with filters, sorts, and search term.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Search result with images.</returns>
+    /// <response code="200">Images retrieved successfully.</response>
+    /// <response code="400">Invalid search request.</response>
+    /// <response code="401">Not authenticated.</response>
+    [HttpPost("search")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<SearchResult<ImageListDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> SearchImages(
+        [FromBody] SearchImagesQuery request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        return Ok(ApiResponse<SearchResult<ImageListDto>>.SuccessResponse(result));
     }
 
     /// <summary>
