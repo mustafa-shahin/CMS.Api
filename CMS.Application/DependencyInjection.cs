@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using CMS.Application.Common.Behaviors;
+using CMS.Application.Common.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,9 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+
+        // Register search services
+        services.AddScoped<ISearchService, SearchService>();
 
         return services;
     }
