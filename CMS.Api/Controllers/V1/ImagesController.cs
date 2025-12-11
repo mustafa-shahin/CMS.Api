@@ -5,8 +5,6 @@ using CMS.Application.Features.Media.Commands.UpdateImage;
 using CMS.Application.Features.Media.Commands.UploadImage;
 using CMS.Application.Features.Media.DTOs;
 using CMS.Application.Common.Models.Search;
-using CMS.Application.Features.Media.Commands.UploadImage;
-using CMS.Application.Features.Media.DTOs;
 using CMS.Application.Features.Media.Queries;
 using CMS.Application.Features.Media.Queries.GetImage;
 using CMS.Application.Features.Media.Queries.GetImagesWithPagination;
@@ -73,6 +71,7 @@ public sealed class ImagesController : ControllerBase
 
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
+    }
     /// Advanced search for images with full-text search, filtering, sorting, and paging.
     /// </summary>
     /// <param name="request">Search request with filters, sorts, and search term.</param>
